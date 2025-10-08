@@ -57,9 +57,9 @@ module.exports.varifyToken = async (req, res, next) => {
 
         res.cookie("accessToken", newAccessToken, {
           httpOnly : true,
-          secure : process.env.NODE_ENV === 'production',
-          sameSite : process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-          domain : process.env.NODE_ENV === 'production' ? undefined : undefined,
+          secure : true,
+          sameSite : 'None',
+          domain : undefined,
           maxAge : 20 * 60 * 1000 // 20 minutes
         });
 

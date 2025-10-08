@@ -13,7 +13,7 @@ export default defineConfig({
       '/api' : {
         target: process.env.VITE_BACKEND_BASE_URL,
         changeOrigin : true,
-        secure : false,
+        secure : true,
       }
     },
   }
