@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
       return {success : true};
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.error);
+      toast.error(error.response?.data?.error);
       throw error;
     } finally{
       setLoading(false);

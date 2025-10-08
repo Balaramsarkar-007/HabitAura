@@ -6,6 +6,7 @@ const habit = require('../model/habit');
 
 // check and send reminders in every minute
 const startReminderScheduler = () => {
+    console.log('Reminder scheduler started');
     cron.schedule('* * * * *', async () => {
         try {
             await checkAndSendReminders();
