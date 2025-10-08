@@ -5,23 +5,28 @@ const User = require('../model/user');
 
 // rate limiter middleware for auth routes
 module.exports.authLimiter = rateLimit({
-  window: 15 * 60 * 1000, 
-  max: 10,
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message : {
     success : false,
     error : 'Too many authentication attempts, please try again later.'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+
+
+  skip: (req) => {
+    return req.path === '/health' || req.path === '/api/health';
+  }
 });
 
 // helper function to generate tokens
 const generateAccessToken = (user) => {
    const accessToken = jwt.sign(
           {
-              userId : this._id,
-              email : this.email,
-              username : this.username
+              userId : user._id,
+              email : user.email,
+              username : user.username
           },
           process.env.JWT_ACCESS_SECRET,
           {expiresIn : '20m'}

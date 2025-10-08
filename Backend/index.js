@@ -10,6 +10,13 @@ const {startReminderScheduler} = require('./config/reminderShedulserService');
 
 dotenv.config();
 
+// Enable trust proxy for production deployments
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1); // Trust first proxy
+} else {
+    app.set('trust proxy', false); // Don't trust proxy in development
+}
+
 // middlewares
 app.use(cors({
   origin: process.env.BASE_URL || '*',
