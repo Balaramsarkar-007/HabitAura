@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const User = require('../model/user');
 const bcrypt = require('bcrypt');
-const {authLimiter, varifyToken} = require("../middleware/authMiddleware");
+const {authLimiter, varifyToken, getCookieConfig} = require("../middleware/authMiddleware");
 const { sendWelcomeMail } = require("../config/mailServer");
 
 
@@ -45,19 +45,22 @@ router.post("/signup", authLimiter, async (req, res) => {
       console.error("Error sending welcome email:", welcomeEmail.error);
     }
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly : true,
-      secure : true,
-      sameSite : 'none',
-      maxAge : 20 * 60 * 1000, // 20 minutes
-    });
+    // res.cookie('accessToken', accessToken, {
+    //   httpOnly : true,
+    //   secure : true,
+    //   sameSite : 'none',
+    //   maxAge : 20 * 60 * 1000, // 20 minutes
+    // });
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly : true,
-      secure : true,
-      sameSite : 'none',
-      maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    // res.cookie('refreshToken', refreshToken, {
+    //   httpOnly : true,
+    //   secure : true,
+    //   sameSite : 'none',
+    //   maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
+    // });
+
+    res.cookie('accessToken', accessToken, getCookieConfig('access'));
+    res.cookie('refreshToken', refreshToken, getCookieConfig('refresh'));
 
     res.status(201).json({
       success : true,
@@ -104,19 +107,22 @@ router.post("/login", authLimiter, async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly : true,
-      secure : true,
-      sameSite : 'none',
-      maxAge : 20 * 60 * 1000 // 20 minutes
-    });
+    // res.cookie('accessToken', accessToken, {
+    //   httpOnly : true,
+    //   secure : true,
+    //   sameSite : 'none',
+    //   maxAge : 20 * 60 * 1000 // 20 minutes
+    // });
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly : true,
-      secure : true,
-      sameSite : 'none',
-      maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    // res.cookie('refreshToken', refreshToken, {
+    //   httpOnly : true,
+    //   secure : true,
+    //   sameSite : 'none',
+    //   maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
+    // });
+
+    res.cookie('accessToken', accessToken, getCookieConfig('access'));
+    res.cookie('refreshToken', refreshToken, getCookieConfig('refresh'));
 
     res.status(200).json({
       success : true,
@@ -192,19 +198,22 @@ router.post('/refresh-token', async (req, res) => {
     user.refreshToken = newRefreshToken;
     await user.save();
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly : true,
-      secure : true,
-      sameSite : 'none',
-      maxAge : 20 * 60 * 1000 // 20 minutes
-    });
+    // res.cookie('accessToken', accessToken, {
+    //   httpOnly : true,
+    //   secure : true,
+    //   sameSite : 'none',
+    //   maxAge : 20 * 60 * 1000 // 20 minutes
+    // });
 
-    res.cookie('refreshToken', newRefreshToken, {
-      httpOnly : true,
-      secure : true,
-      sameSite : 'none',
-      maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    // res.cookie('refreshToken', newRefreshToken, {
+    //   httpOnly : true,
+    //   secure : true,
+    //   sameSite : 'none',
+    //   maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
+    // });
+
+    res.cookie('accessToken', accessToken, getCookieConfig('access'));
+    res.cookie('refreshToken', newRefreshToken, getCookieConfig('refresh'));
 
     res.status(200).json({
       success  :true,

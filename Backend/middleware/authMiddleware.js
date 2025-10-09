@@ -34,6 +34,19 @@ const generateAccessToken = (user) => {
    return accessToken;
 }
 
+const getCookieConfig = (tokenType = 'access') => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const maxAge = tokenType === 'access' ? 20 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+  
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge,
+    path: '/'
+  };
+};
+
 
 // varify token middleware
 module.exports.varifyToken = async (req, res, next) => {
@@ -60,12 +73,14 @@ module.exports.varifyToken = async (req, res, next) => {
 
         const newAccessToken = generateAccessToken(user);
 
-        res.cookie("accessToken", newAccessToken, {
-          httpOnly : true,
-          secure : true,
-          sameSite : 'none',
-          maxAge : 20 * 60 * 1000 // 20 minutes
-        });
+        // res.cookie("accessToken", newAccessToken, {
+        //   httpOnly : true,
+        //   secure : true,
+        //   sameSite : 'none',
+        //   maxAge : 20 * 60 * 1000 // 20 minutes
+        // });
+
+        res.cookie("accessToken", newAccessToken, getCookieConfig('access'));
 
         req.user = user;
         return next();
@@ -98,4 +113,9 @@ module.exports.varifyToken = async (req, res, next) => {
       message: "Internal server error"
     });
   }
+}
+
+module.exports = {
+  generateAccessToken,
+  getCookieConfig
 }
