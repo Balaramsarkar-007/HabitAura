@@ -4,7 +4,7 @@ require('dotenv').config();
 const User = require('../model/user');
 
 // rate limiter middleware for auth routes
-module.exports.authLimiter = rateLimit({
+const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   message : {
@@ -49,7 +49,7 @@ const getCookieConfig = (tokenType = 'access') => {
 
 
 // varify token middleware
-module.exports.varifyToken = async (req, res, next) => {
+const varifyToken = async (req, res, next) => {
   try {
     const accessToken = req.cookies?.accessToken;
     const refreshToken = req.cookies?.refreshToken;
@@ -117,5 +117,7 @@ module.exports.varifyToken = async (req, res, next) => {
 
 module.exports = {
   generateAccessToken,
-  getCookieConfig
+  getCookieConfig,
+  authLimiter,
+  varifyToken
 }
