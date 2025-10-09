@@ -1,70 +1,85 @@
 const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 require('dotenv').config();
 
+// Intitialize Resend with your API key
+let resend = null;
+if(process.env.RESEND_API_KEY){
+    resend = new Resend(process.env.RESEND_API_KEY);
+    console.log("Resend initialized successfully");
+} else {
+    console.error("RESEND_API_KEY is not set in environment variables");
+}
 
-// create the email transporter
-// const createTransporter = () => {
-//     return nodemailer.createTransport({
-//         host: "smtp.gmail.com",
-//         port: 587,
-//         secure: false,
-//         service : "gmail",
-//         auth : {
-//             user : process.env.EMAIL_USER,
-//             pass : process.env.EMAIL_PASS
-//         },
+// Gmail transpoter configuration (backup)
+const createGmailTransporter = () => {
+    return nodemailer.createTransport({
+        service : 'gmail',
+        auth : {
+            user : process.env.EMAIL_USER,
+            pass : process.env.EMAIL_PASS
+        },
+        connectionTimeout : 50000,
+        greetingTimeout : 50000,
+        socketTimeout : 50000
+    });
+}
 
-//         tls: {
-//             rejectUnauthorized: false
-//         },
-//         connectionTimeout: 60000,
-//         greetingTimeout: 30000,
-//         socketTimeout: 60000,
-//         pool : true,
-//         maxConnections : 5,
-//     });
-// }
+// Multi-provider email sender
+const createGmailWithTransporter = async (to, subject, html) => {
+    // if(resend){
+    //     console.log("Using Resend for email delivery");
 
-// Create transporter ONCE with connection pooling
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com", // e.g., smtp.gmail.com
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  // IMPORTANT: Enable connection pooling
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100, 
-  rateDelta: 1000,
-  rateLimit: 5, 
-  // Timeout settings
-  connectionTimeout: 10000, 
-  greetingTimeout: 10000, 
-  socketTimeout: 30000, 
-});
+    //     try {
+    //         const { data, error } = await resend.emails.send({
+    //             from : `'HabitAura' <onboarding@resend.dev>`,
+    //             to : to,
+    //             subject : subject,
+    //             html : html
+    //         });
 
-// Verify connection configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ Nodemailer connection error:', error);
-  } else {
-    console.log('✅ Nodemailer is ready to send emails');
-  }
-});
+    //     if(error){
+    //         console.error("Error sending email via Resend: ", error);
+    //         return { success: false, error: error.message };
+    //     }
+        
+    //     console.log("Email sent sucessfully via Resend: ", data.id);
+    //     return { success: true, messageId: data.id };
+    //     } catch (error) {
+    //         console.error("Error sending email via Resend: ", error);
+    //         return { success: false, error: error.message };
+    //     }
+    // }
+
+     // Only try Gmail in development
+    // if (process.env.NODE_ENV !== 'production') {
+        try {
+            console.log('📧 Trying Gmail (development only)...');
+            const transporter = createGmailTransporter();
+
+            const info = await transporter.sendMail({
+                from: `"HabitAura" <${process.env.EMAIL_USER}>`,
+                to: to,
+                subject: subject,
+                html: html
+            });
+
+            transporter.close();
+            console.log('✅ Email sent with Gmail:', info.messageId);
+            return { success: true, messageId: info.messageId, provider: 'gmail' };
+
+        } catch (error) {
+            console.error('❌ Gmail also failed:', error.message);
+            return { success: false, error: 'All email providers failed: ' + error.message };
+        }
+    // }
+}
 
 // send habit reminder email
 const sendHabitReminder = async (userEmail, userName, habitName, habitDescription) => {
     try {
-        // const transporter = createTransporter();
-
-        const mailOptions = {
-            from : process.env.EMAIL_USER,
-            to : userEmail,
-            subject : `🎯 Habit Reminder: ${habitName}`,
-            html : `
+           const subject = `🎯 Habit Reminder: ${habitName}`;
+            const html = `
                   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
                         <h1 style="color: white; margin: 0;">HabitAura Reminder</h1>
@@ -102,12 +117,14 @@ const sendHabitReminder = async (userEmail, userName, habitName, habitDescriptio
                         </p>
                     </div>
                 </div>
-            `,
-        };
+            `;
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent: ", info.messageId);
-        return { success: true, messageId: info.messageId };
+        const info = await createGmailWithTransporter(userEmail, subject, html);
+        if(!info.success){
+            throw new Error(info.error || "Failed to send email");
+        }
+        console.log("Email sent: ", info);
+        return { success: true, messageId: info };
     } catch (error) {
         console.log("Error sending email: ", error);
         return { success: false, error: error.message };
@@ -117,13 +134,9 @@ const sendHabitReminder = async (userEmail, userName, habitName, habitDescriptio
 // welcome email
 const sendWelcomeMail = async (userEmail, userName) => {
     try {
-        // const transporter = createTransporter();
 
-        const mailOptions = {
-            from : process.env.EMAIL_USER,
-            to : userEmail,
-            subject : `🎉 Welcome to HabitAura, ${userName}!`,
-            html : `
+        const subject = `🎉 Welcome to HabitAura, ${userName}!`;    
+        const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
                 <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to HabitAura!</h1>
@@ -171,10 +184,9 @@ const sendWelcomeMail = async (userEmail, userName) => {
                 </p>
                 </div>
             </div>
-            `
-        };
+            `;
 
-        const info = await transporter.sendMail(mailOptions);
+        const info = await createGmailWithTransporter(userEmail, subject, html);
         console.log("Welcome email sent: ", info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (error) {

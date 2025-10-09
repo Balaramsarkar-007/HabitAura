@@ -48,7 +48,10 @@ export const AuthProvider = ({ children }) => {
   // refresh token
   const refreshToken = async () => {
     try {
-      const response = await axios.post(`${baseUrl}/api/auth/refresh-token`);
+      const response = await axios.post(`${baseUrl}/api/auth/refresh-token`,{
+        withCredentials: true,
+        credentials : 'include'
+      });
 
       if (response.data.success) {
         // retry to get user info
@@ -67,10 +70,13 @@ export const AuthProvider = ({ children }) => {
   const signup = async (data) => {
     setLoading(true);
     try {
-      const response = await axios.post(`${baseUrl}/api/auth/signup`, data);
+      const response = await axios.post(`${baseUrl}/api/auth/signup`, data, {
+        withCredentials: true,
+        credentials : 'include'
+      });
       setUser(response.data.user);
       setIsAuth(true);
-      toast.success(`Welcome ${response.data.user} 👏!`);
+      toast.success(`Welcome ${response.data.user.username} 👏!`);
       return {success : true};
     } catch (error) {
       console.log(error);
@@ -85,7 +91,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (data) => {
     setLoading(true);
     try {
-      const response = await axios.post(`${baseUrl}/api/auth/login`, data);
+      const response = await axios.post(`${baseUrl}/api/auth/login`, data, {
+        withCredentials: true,
+        credentials : 'include'
+      });
       setUser(response.data.user);
       setIsAuth(true);
       toast.success(`Welcome back ${response.data.user.username} 😊!`);
