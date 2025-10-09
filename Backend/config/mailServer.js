@@ -3,32 +3,62 @@ require('dotenv').config();
 
 
 // create the email transporter
-const createTransporter = () => {
-    return nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        service : "gmail",
-        auth : {
-            user : process.env.EMAIL_USER,
-            pass : process.env.EMAIL_PASS
-        },
+// const createTransporter = () => {
+//     return nodemailer.createTransport({
+//         host: "smtp.gmail.com",
+//         port: 587,
+//         secure: false,
+//         service : "gmail",
+//         auth : {
+//             user : process.env.EMAIL_USER,
+//             pass : process.env.EMAIL_PASS
+//         },
 
-        tls: {
-            rejectUnauthorized: false
-        },
-        connectionTimeout: 60000,
-        greetingTimeout: 30000,
-        socketTimeout: 60000,
-        pool : true,
-        maxConnections : 5,
-    });
-}
+//         tls: {
+//             rejectUnauthorized: false
+//         },
+//         connectionTimeout: 60000,
+//         greetingTimeout: 30000,
+//         socketTimeout: 60000,
+//         pool : true,
+//         maxConnections : 5,
+//     });
+// }
+
+// Create transporter ONCE with connection pooling
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com", // e.g., smtp.gmail.com
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  // IMPORTANT: Enable connection pooling
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100, 
+  rateDelta: 1000,
+  rateLimit: 5, 
+  // Timeout settings
+  connectionTimeout: 10000, 
+  greetingTimeout: 10000, 
+  socketTimeout: 30000, 
+});
+
+// Verify connection configuration
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('❌ Nodemailer connection error:', error);
+  } else {
+    console.log('✅ Nodemailer is ready to send emails');
+  }
+});
 
 // send habit reminder email
 const sendHabitReminder = async (userEmail, userName, habitName, habitDescription) => {
     try {
-        const transporter = createTransporter();
+        // const transporter = createTransporter();
 
         const mailOptions = {
             from : process.env.EMAIL_USER,
@@ -87,7 +117,7 @@ const sendHabitReminder = async (userEmail, userName, habitName, habitDescriptio
 // welcome email
 const sendWelcomeMail = async (userEmail, userName) => {
     try {
-        const transporter = createTransporter();
+        // const transporter = createTransporter();
 
         const mailOptions = {
             from : process.env.EMAIL_USER,
