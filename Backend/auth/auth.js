@@ -48,14 +48,14 @@ router.post("/signup", authLimiter, async (req, res) => {
     res.cookie('accessToken', accessToken, {
       httpOnly : true,
       secure : true,
-      sameSite : 'strict',
+      sameSite : 'none',
       maxAge : 20 * 60 * 1000, // 20 minutes
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly : true,
       secure : true,
-      sameSite : 'strict',
+      sameSite : 'none',
       maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -107,14 +107,14 @@ router.post("/login", authLimiter, async (req, res) => {
     res.cookie('accessToken', accessToken, {
       httpOnly : true,
       secure : true,
-      sameSite : 'strict',
+      sameSite : 'none',
       maxAge : 20 * 60 * 1000 // 20 minutes
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly : true,
       secure : true,
-      sameSite : 'strict',
+      sameSite : 'none',
       maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -195,14 +195,14 @@ router.post('/refresh-token', async (req, res) => {
     res.cookie('accessToken', accessToken, {
       httpOnly : true,
       secure : true,
-      sameSite : 'strict',
+      sameSite : 'none',
       maxAge : 20 * 60 * 1000 // 20 minutes
     });
 
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly : true,
       secure : true,
-      sameSite : 'strict',
+      sameSite : 'none',
       maxAge : 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
