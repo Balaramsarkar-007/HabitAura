@@ -1,20 +1,12 @@
 const nodemailer = require('nodemailer');
-const { Resend } = require('resend');
 require('dotenv').config();
-
-// Intitialize Resend with your API key
-let resend = null;
-if(process.env.RESEND_API_KEY){
-    resend = new Resend(process.env.RESEND_API_KEY);
-    console.log("Resend initialized successfully");
-} else {
-    console.error("RESEND_API_KEY is not set in environment variables");
-}
 
 // Gmail transpoter configuration (backup)
 const createGmailTransporter = () => {
     return nodemailer.createTransport({
         service : 'gmail',
+        port : 465,
+        secure : true,
         auth : {
             user : process.env.EMAIL_USER,
             pass : process.env.EMAIL_PASS
@@ -27,34 +19,8 @@ const createGmailTransporter = () => {
 
 // Multi-provider email sender
 const createGmailWithTransporter = async (to, subject, html) => {
-    // if(resend){
-    //     console.log("Using Resend for email delivery");
-
-    //     try {
-    //         const { data, error } = await resend.emails.send({
-    //             from : `'HabitAura' <onboarding@resend.dev>`,
-    //             to : to,
-    //             subject : subject,
-    //             html : html
-    //         });
-
-    //     if(error){
-    //         console.error("Error sending email via Resend: ", error);
-    //         return { success: false, error: error.message };
-    //     }
-        
-    //     console.log("Email sent sucessfully via Resend: ", data.id);
-    //     return { success: true, messageId: data.id };
-    //     } catch (error) {
-    //         console.error("Error sending email via Resend: ", error);
-    //         return { success: false, error: error.message };
-    //     }
-    // }
-
-     // Only try Gmail in development
-    // if (process.env.NODE_ENV !== 'production') {
         try {
-            console.log('📧 Trying Gmail (development only)...');
+            console.log('📧 Trying Gmail send mail...');
             const transporter = createGmailTransporter();
 
             const info = await transporter.sendMail({
