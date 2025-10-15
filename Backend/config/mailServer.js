@@ -5,15 +5,22 @@ require('dotenv').config();
 const createGmailTransporter = () => {
     return nodemailer.createTransport({
         service : 'gmail',
-        port : 465,
-        secure : true,
+        port : 587,
+        secure : false,
         auth : {
             user : process.env.EMAIL_USER,
             pass : process.env.EMAIL_PASS
         },
-        connectionTimeout : 50000,
-        greetingTimeout : 50000,
-        socketTimeout : 50000
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+        pool: true,
+        maxConnections: 5,
+        maxMessages: 100,
+        tls: {
+            rejectUnauthorized: true,
+            minVersion: 'TLSv1.2'
+        }
     });
 }
 
