@@ -1,47 +1,46 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// Gmail transpoter configuration (backup)
-const createGmailTransporter = () => {
-    return nodemailer.createTransport({
-        host : 'smtp-relay.brevo.com',
-        port : 587,
-        secure : false,
-        auth : {
-            user : process.env.BREVO_USER_NAME,
-            pass : process.env.BREVO_USER_PASSWORD_KEY
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
-        pool: true,
-        maxConnections: 5,
-        maxMessages: 100,
-    });
+let transporter = null;
+
+const getTransporter = () => {
+    if(!transporter){
+            transporter = nodemailer.createTransport({
+            host : 'smtp-relay.brevo.com',
+            port : 587,
+            secure : false,
+            auth : {
+                user : process.env.BREVO_USER_NAME,
+                pass : process.env.BREVO_USER_PASSWORD_KEY
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000,
+            pool: true,
+            maxConnections: 5,
+            maxMessages: 100,
+        });
+        console.log('✅ Email transporter initialized');
+    }
+    return transporter;
 }
 
-// Multi-provider email sender
-const createGmailWithTransporter = async (to, subject, html) => {
-        try {
-            console.log('📧 Trying Gmail send mail...');
-            const transporter = createGmailTransporter();
-
-            const info = await transporter.sendMail({
-                from: `"HabitAura" <${process.env.EMAIL_USER}>`,
-                to: to,
-                subject: subject,
-                html: html
-            });
-
-            transporter.close();
-            console.log('✅ Email sent :', info.messageId);
-            return { success: true, messageId: info.messageId, provider: 'gmail' };
-
-        } catch (error) {
-            console.error('❌ mail also failed:', error.message);
-            return { success: false, error: 'All email providers failed: ' + error.message };
-        }
-    // }
+// send email funtion
+const sendEmail = async (to, subject, html) =>{
+    try {
+        console.log("Sending email to:", to);
+        const info = await getTransporter().sendMail({
+            from : `"HabitAura" <${process.env.BREVO_USER_NAME}>`,
+            to,
+            subject,
+            html
+        })
+        console.log("Email sent: ", info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error("Error sending email: ", error);
+        return { success: false, error: error.message };
+    }
 }
 
 // send habit reminder email
@@ -88,7 +87,7 @@ const sendHabitReminder = async (userEmail, userName, habitName, habitDescriptio
                 </div>
             `;
 
-        const info = await createGmailWithTransporter(userEmail, subject, html);
+        const info = await sendEmail(userEmail, subject, html);
         if(!info.success){
             throw new Error(info.error || "Failed to send email");
         }
@@ -155,7 +154,7 @@ const sendWelcomeMail = async (userEmail, userName) => {
             </div>
             `;
 
-        const info = await createGmailWithTransporter(userEmail, subject, html);
+        const info = await sendEmail(userEmail, subject, html);
         console.log("Welcome email sent: ", info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (error) {
