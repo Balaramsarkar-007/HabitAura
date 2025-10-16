@@ -1,47 +1,44 @@
 const nodemailer = require('nodemailer');
+const brevo = require('@getbrevo/brevo');
 require('dotenv').config();
 
-let transporter = null;
+let apiInstance = null
 
-const getTransporter = () => {
-    if(!transporter){
-            transporter = nodemailer.createTransport({
-            host : 'smtp-relay.brevo.com',
-            port : 587,
-            secure : false,
-            auth : {
-                user : process.env.BREVO_USER_NAME,
-                pass : process.env.BREVO_USER_PASSWORD_KEY
-            },
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 10000,
-            pool: true,
-            maxConnections: 5,
-            maxMessages: 100,
-        });
-        console.log('✅ Email transporter initialized');
+const getBrevoClient = () => {
+    if(!apiInstance){
+        apiInstance = new brevo.TransactionalEmailsApi();
+        apiInstance.setApiKey(
+            brevo.TransactionalEmailsApiApiKeys.apiKey,
+            process.env.BREVO_API_KEY
+        );
+        console.log('✅ Brevo client initialized');
     }
-    return transporter;
+    return apiInstance;
 }
 
 // send email funtion
 const sendEmail = async (to, subject, html) =>{
     try {
         console.log("Sending email to:", to);
-        const info = await getTransporter().sendMail({
-            from : `"HabitAura" <${process.env.BREVO_USER_NAME}>`,
-            to,
-            subject,
-            html
-        })
-        console.log("Email sent: ", info.messageId);
-        return { success: true, messageId: info.messageId };
+
+        const sendBrevoEmail = new brevo.SendSmtpEmail();
+        sendBrevoEmail.subject = subject;
+        sendBrevoEmail.htmlContent = html;
+        sendBrevoEmail.sender = {
+            name: "HabitAura",
+            email: process.env.BREVO_USER_NAME
+        };
+        sendBrevoEmail.to = [{ email: to }];
+
+        const info =  await getBrevoClient().sendTransacEmail(sendBrevoEmail);
+
+        console.log("Email sent: ", info);
+        return { success: true, messageId: info };
     } catch (error) {
         console.error("Error sending email: ", error);
         return { success: false, error: error.message };
     }
-}
+};
 
 // send habit reminder email
 const sendHabitReminder = async (userEmail, userName, habitName, habitDescription) => {
