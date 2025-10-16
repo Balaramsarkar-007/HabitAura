@@ -29,8 +29,8 @@ const sendEmail = async (to, subject, html) =>{
 
         const info =  await getBrevoClient().sendTransacEmail(sendBrevoEmail);
 
-        console.log("Email sent: ", info.body.messageId);
-        return { success: true, messageId: info };
+        console.log("Email sent: ", info?.body?.messageId);
+        return { success: true, messageId: info?.body?.messageId };
     } catch (error) {
         console.error("Error sending email: ", error);
         return { success: false, error: error.message };
@@ -85,8 +85,8 @@ const sendHabitReminder = async (userEmail, userName, habitName, habitDescriptio
         if(!info.success){
             throw new Error(info.error || "Failed to send email");
         }
-        console.log("Email sent: ", info.body.messageId);
-        return { success: true, messageId: info.body.messageId };
+        console.log("Email sent: ", info?.body?.messageId);
+        return { success: true, messageId: info?.body?.messageId };
     } catch (error) {
         console.log("Error sending email: ", error);
         return { success: false, error: error.message };
@@ -149,8 +149,8 @@ const sendWelcomeMail = async (userEmail, userName) => {
             `;
 
         const info = await sendEmail(userEmail, subject, html);
-        console.log("Welcome email sent: ", info.body.messageId);
-        return { success: true, messageId: info.body.messageId };
+        console.log("Welcome email sent: ", info?.body?.messageId);
+        return { success: true, messageId: info?.body?.messageId };
     } catch (error) {
         console.error("Error sending welcome email: ", error);
         return { success: false, error: error.message };
