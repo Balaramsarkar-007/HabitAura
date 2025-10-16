@@ -4,12 +4,12 @@ require('dotenv').config();
 // Gmail transpoter configuration (backup)
 const createGmailTransporter = () => {
     return nodemailer.createTransport({
-        service : 'gmail',
+        host : 'smtp-relay.brevo.com',
         port : 587,
         secure : false,
         auth : {
-            user : process.env.EMAIL_USER,
-            pass : process.env.EMAIL_PASS
+            user : process.env.BREVO_USER_NAME,
+            pass : process.env.BREVO_USER_PASSWORD_KEY
         },
         connectionTimeout: 10000,
         greetingTimeout: 10000,
@@ -17,10 +17,6 @@ const createGmailTransporter = () => {
         pool: true,
         maxConnections: 5,
         maxMessages: 100,
-        tls: {
-            rejectUnauthorized: true,
-            minVersion: 'TLSv1.2'
-        }
     });
 }
 
@@ -38,11 +34,11 @@ const createGmailWithTransporter = async (to, subject, html) => {
             });
 
             transporter.close();
-            console.log('✅ Email sent with Gmail:', info.messageId);
+            console.log('✅ Email sent :', info.messageId);
             return { success: true, messageId: info.messageId, provider: 'gmail' };
 
         } catch (error) {
-            console.error('❌ Gmail also failed:', error.message);
+            console.error('❌ mail also failed:', error.message);
             return { success: false, error: 'All email providers failed: ' + error.message };
         }
     // }
