@@ -7,10 +7,7 @@ let apiInstance = null
 const getBrevoClient = () => {
     if(!apiInstance){
         apiInstance = new brevo.TransactionalEmailsApi();
-        apiInstance.setApiKey(
-            brevo.TransactionalEmailsApiApiKeys.apiKey,
-            process.env.BREVO_API_KEY
-        );
+        apiInstance.authentications['apiKey'].apiKey = process.env.BREVO_API_KEY;
         console.log('✅ Brevo client initialized');
     }
     return apiInstance;
@@ -26,13 +23,13 @@ const sendEmail = async (to, subject, html) =>{
         sendBrevoEmail.htmlContent = html;
         sendBrevoEmail.sender = {
             name: "HabitAura",
-            email: process.env.BREVO_USER_NAME
+            email: process.env.EMAIL_USER
         };
         sendBrevoEmail.to = [{ email: to }];
 
         const info =  await getBrevoClient().sendTransacEmail(sendBrevoEmail);
 
-        console.log("Email sent: ", info);
+        console.log("Email sent: ", info.body.messageId);
         return { success: true, messageId: info };
     } catch (error) {
         console.error("Error sending email: ", error);
@@ -88,8 +85,8 @@ const sendHabitReminder = async (userEmail, userName, habitName, habitDescriptio
         if(!info.success){
             throw new Error(info.error || "Failed to send email");
         }
-        console.log("Email sent: ", info);
-        return { success: true, messageId: info };
+        console.log("Email sent: ", info.body.messageId);
+        return { success: true, messageId: info.body.messageId };
     } catch (error) {
         console.log("Error sending email: ", error);
         return { success: false, error: error.message };
@@ -152,8 +149,8 @@ const sendWelcomeMail = async (userEmail, userName) => {
             `;
 
         const info = await sendEmail(userEmail, subject, html);
-        console.log("Welcome email sent: ", info.messageId);
-        return { success: true, messageId: info.messageId };
+        console.log("Welcome email sent: ", info.body.messageId);
+        return { success: true, messageId: info.body.messageId };
     } catch (error) {
         console.error("Error sending welcome email: ", error);
         return { success: false, error: error.message };
