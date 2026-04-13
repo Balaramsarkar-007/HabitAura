@@ -7,7 +7,7 @@ export default function StartBtn(){
     return (
       <View style={styles.container}>
         <TouchableOpacity
-            onPress={() => router.push('/')}
+            onPress={() => router.push('/auth')}
         >
           <Text style={styles.text}>Get Started For Free
             <Ionicons style={styles.arrow} name="arrow-forward-outline" size={24} color="white" />
