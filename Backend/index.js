@@ -5,6 +5,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const auth = require('./auth/auth');
 const habit = require('./habits/habits');
+const aiChart = require('./habits/aiChart');
 const {connectDB, isDBConnected} = require('./config/database');
 const {startReminderScheduler} = require('./config/reminderShedulserService');
 
@@ -47,6 +48,7 @@ connectDB().then(() => {
 // routes
 app.use('/api/auth', auth);
 app.use('/api/habit', habit);
+app.use('/api/ai-chart', aiChart);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

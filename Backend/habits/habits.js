@@ -21,6 +21,30 @@ router.get('/habits', varifyToken, async (req, res, next) => {
     }
 })
 
+// Get habit by name
+router.get('/habit/:name', varifyToken, async (req, res, next) => {
+    try {
+        const habitName = req.params.name;
+        const habit = await Habit.findOne({ userId: req.user._id, name: habitName });
+
+        if (!habit) {
+            return res.status(404).json({
+                success: false,
+                message: "Habit not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Habit found successfully",
+            habit: habit
+        });
+    } catch (error) {
+        console.log('Get habit by name error: ', error);
+        next(error);
+    }
+})
+
 // Create new habit
 router.post('/create', varifyToken, async (req, res) =>{
     try {

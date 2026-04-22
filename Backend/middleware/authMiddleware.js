@@ -20,6 +20,19 @@ const authLimiter = rateLimit({
   }
 });
 
+// rate limiter middleware for ai routes — 10 requests per minute per IP
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => req.ip,
+  message: {
+    success: false,
+    error: 'Too many requests, please wait a minute and try again.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // helper function to generate tokens
 const generateAccessToken = (user) => {
    const accessToken = jwt.sign(
@@ -119,5 +132,6 @@ module.exports = {
   generateAccessToken,
   getCookieConfig,
   authLimiter,
+  aiLimiter,
   varifyToken
 }
