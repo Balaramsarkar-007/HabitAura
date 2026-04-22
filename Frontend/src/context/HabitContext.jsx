@@ -340,6 +340,10 @@ export const HabitProvider = ({ children}) => {
         }
     }
 
+    const getHabitByName = (name) => {
+        return habitState.habits.find(habit => habit.name.toLowerCase() === name.toLowerCase());
+    }
+
     const weaklyProgress = [];
     for (let i=6; i>=0; i--) {
         const currCompleted = habitState.habits.reduce((acc, habit) => acc + (habit.complatedDates.includes(format(subDays(new Date(), i), 'dd-MM-yyyy')) ? 1 : 0), 0);
@@ -440,6 +444,7 @@ export const HabitProvider = ({ children}) => {
         error : habitState.error, 
         loading: habitState.loading,
         user : habitState.user,
+        getHabitByName,
     }
     return (
         <HabitContext.Provider value={values}>
